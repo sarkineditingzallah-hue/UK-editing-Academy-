@@ -1,11 +1,7 @@
-name: Build UK Editing Academy
+name: Build UK Editing Academy APK
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'UK_Editing_Academy_V64_Phone_Cloud_Build_Pack.zip'
-      - '.github/workflows/android-build.yml'
 
 jobs:
   build:
@@ -21,7 +17,7 @@ jobs:
           mkdir appsrc
           unzip -q "UK_Editing_Academy_V64_Phone_Cloud_Build_Pack.zip" -d appsrc
           SRC=$(find appsrc -type f -name pubspec.yaml -printf '%h\n' | head -n 1)
-          echo "Project found at: $SRC"
+          test -n "$SRC"
           cp -a "$SRC"/. .
 
       - name: Setup Flutter
@@ -30,23 +26,17 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Create Android files
+        run: flutter create . --platforms=android --project-name uk_editing_academy
+
       - name: Get packages
         run: flutter pub get
 
       - name: Build APK
         run: flutter build apk --debug --dart-define=USE_FIREBASE=false
 
-      - name: Build AAB
-        run: flutter build appbundle --debug --dart-define=USE_FIREBASE=false
-
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
           name: uk-editing-academy-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
-
-      - name: Save AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: uk-editing-academy-aab
-          path: build/app/outputs/bundle/debug/app-debug.aab
