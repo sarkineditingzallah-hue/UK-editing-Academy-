@@ -11,11 +11,14 @@ jobs:
       - name: Get project
         uses: actions/checkout@v4
 
-      - name: Extract V64 project
+      - name: Find and extract project ZIP
         run: |
+          ZIP=$(find . -maxdepth 1 -type f -name "*.zip" -printf "%s %p\n" | sort -nr | head -n 1 | cut -d' ' -f2-)
+          echo "Using ZIP: $ZIP"
+          test -n "$ZIP"
           rm -rf appsrc
           mkdir appsrc
-          unzip -q "UK_Editing_Academy_V64_Phone_Cloud_Build_Pack.zip" -d appsrc
+          unzip -q "$ZIP" -d appsrc
           SRC=$(find appsrc -type f -name pubspec.yaml -printf '%h\n' | head -n 1)
           test -n "$SRC"
           cp -a "$SRC"/. .
